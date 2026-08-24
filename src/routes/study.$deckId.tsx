@@ -24,6 +24,8 @@ function StudyPage() {
   const [queue, setQueue] = useState<string[] | null>(null);
   const [flipped, setFlipped] = useState(false);
   const [stats, setStats] = useState({ known: 0, again: 0 });
+  const [autoPlay, setAutoPlay] = useState(true);
+  const { speak, speaking } = useSpeak();
 
   useEffect(() => {
     if (!deck || queue !== null) return;
