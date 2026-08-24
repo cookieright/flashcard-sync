@@ -39,6 +39,12 @@ function StudyPage() {
     return deck.cards.find((c) => c.id === queue[0]!);
   }, [deck, queue]);
 
+  const currentFront = current?.front;
+  useEffect(() => {
+    if (!autoPlay || !currentFront) return;
+    speak(currentFront);
+  }, [currentFront, autoPlay, speak]);
+
   if (!ready) return null;
 
   if (!deck) {
