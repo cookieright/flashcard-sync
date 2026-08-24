@@ -1,7 +1,8 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Check, RotateCcw, X } from "lucide-react";
+import { ArrowLeft, Check, RotateCcw, Volume2, X } from "lucide-react";
 import { useDecks, gradeCard, dueCards, type Card } from "@/lib/decks";
+import { useSpeak } from "@/lib/tts";
 
 export const Route = createFileRoute("/study/$deckId")({
   head: () => ({

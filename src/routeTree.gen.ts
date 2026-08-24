@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as StudyDeckIdRouteImport } from './routes/study.$deckId'
+import { Route as ApiPublicTtsRouteImport } from './routes/api/public/tts'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +23,40 @@ const StudyDeckIdRoute = StudyDeckIdRouteImport.update({
   path: '/study/$deckId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicTtsRoute = ApiPublicTtsRouteImport.update({
+  id: '/api/public/tts',
+  path: '/api/public/tts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/study/$deckId': typeof StudyDeckIdRoute
+  '/api/public/tts': typeof ApiPublicTtsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/study/$deckId': typeof StudyDeckIdRoute
+  '/api/public/tts': typeof ApiPublicTtsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/study/$deckId': typeof StudyDeckIdRoute
+  '/api/public/tts': typeof ApiPublicTtsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/study/$deckId'
+  fullPaths: '/' | '/study/$deckId' | '/api/public/tts'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/study/$deckId'
-  id: '__root__' | '/' | '/study/$deckId'
+  to: '/' | '/study/$deckId' | '/api/public/tts'
+  id: '__root__' | '/' | '/study/$deckId' | '/api/public/tts'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   StudyDeckIdRoute: typeof StudyDeckIdRoute
+  ApiPublicTtsRoute: typeof ApiPublicTtsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +75,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudyDeckIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/tts': {
+      id: '/api/public/tts'
+      path: '/api/public/tts'
+      fullPath: '/api/public/tts'
+      preLoaderRoute: typeof ApiPublicTtsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   StudyDeckIdRoute: StudyDeckIdRoute,
+  ApiPublicTtsRoute: ApiPublicTtsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
