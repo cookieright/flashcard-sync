@@ -1,7 +1,8 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Check, RotateCcw, X } from "lucide-react";
+import { ArrowLeft, Check, RotateCcw, Volume2, X } from "lucide-react";
 import { useDecks, gradeCard, dueCards, type Card } from "@/lib/decks";
+import { useSpeak } from "@/lib/tts";
 
 export const Route = createFileRoute("/study/$deckId")({
   head: () => ({
@@ -23,6 +24,8 @@ function StudyPage() {
   const [queue, setQueue] = useState<string[] | null>(null);
   const [flipped, setFlipped] = useState(false);
   const [stats, setStats] = useState({ known: 0, again: 0 });
+  const [autoPlay, setAutoPlay] = useState(true);
+  const { speak, speaking } = useSpeak();
 
   useEffect(() => {
     if (!deck || queue !== null) return;
@@ -35,6 +38,12 @@ function StudyPage() {
     if (!deck || !queue || queue.length === 0) return undefined;
     return deck.cards.find((c) => c.id === queue[0]!);
   }, [deck, queue]);
+
+  const currentFront = current?.front;
+  useEffect(() => {
+    if (!autoPlay || !currentFront) return;
+    speak(currentFront);
+  }, [currentFront, autoPlay, speak]);
 
   if (!ready) return null;
 
@@ -129,6 +138,28 @@ function StudyPage() {
                   <p className="mt-4 max-w-sm text-sm italic text-muted-foreground">{current.hint}</p>
                 )}
               </Face>
+            </button>
+          </div>
+
+          <div className="mb-3 flex items-center justify-center gap-3">
+            <button
+              onClick={() => speak(current.front)}
+              className={`flex items-center gap-2 rounded-full bg-card px-4 py-2.5 text-sm font-medium shadow-card transition-transform active:scale-[0.97] ${
+                speaking ? "text-primary" : "text-muted-foreground"
+              }`}
+              aria-label="播放读音"
+            >
+              <Volume2 className="size-4" /> 播放读音
+            </button>
+            <button
+              onClick={() => setAutoPlay((v) => !v)}
+              className={`rounded-full px-3 py-2 text-xs font-medium transition-colors ${
+                autoPlay
+                  ? "bg-primary/10 text-primary"
+                  : "bg-secondary text-muted-foreground"
+              }`}
+            >
+              {autoPlay ? "自动朗读：开" : "自动朗读：关"}
             </button>
           </div>
 
