@@ -33,7 +33,7 @@ function StudyPage() {
 
   const current: Card | undefined = useMemo(() => {
     if (!deck || !queue || queue.length === 0) return undefined;
-    return deck.cards.find((c) => c.id === queue[0]);
+    return deck.cards.find((c) => c.id === queue[0]!);
   }, [deck, queue]);
 
   if (!ready) return null;
@@ -56,7 +56,7 @@ function StudyPage() {
     }));
     setStats((s) => ({ known: s.known + (known ? 1 : 0), again: s.again + (known ? 0 : 1) }));
     setFlipped(false);
-    setQueue(known ? queue.slice(1) : [...queue.slice(1), queue[0]]);
+    setQueue(known ? queue.slice(1) : [...queue.slice(1), queue[0]!]);
   }
 
   const total = deck.cards.length;
@@ -182,7 +182,7 @@ function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
+    [a[i], a[j]] = [a[j]!, a[i]!];
   }
   return a;
 }

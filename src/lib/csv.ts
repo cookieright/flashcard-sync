@@ -55,18 +55,18 @@ function detectDelimiter(text: string): string {
     ";": (firstLine.match(/;/g) || []).length,
     "\t": (firstLine.match(/\t/g) || []).length,
   };
-  return Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
+  return Object.entries(counts).sort((a, b) => b[1] - a[1])[0]![0];
 }
 
 const FRONT_KEYS = ["front", "word", "term", "单词", "正面", "问题", "question"];
 const BACK_KEYS = ["back", "meaning", "definition", "释义", "翻译", "背面", "答案", "answer"];
 const HINT_KEYS = ["hint", "example", "note", "例句", "备注", "提示"];
 
-export type CsvCard = { front: string; back: string; hint?: string };
+export type CsvCard = { front: string; back: string; hint?: string | undefined };
 
 export function rowsToCards(rows: ParsedRow[]): CsvCard[] {
   if (rows.length === 0) return [];
-  const header = rows[0].map((h) => h.toLowerCase());
+  const header = rows[0]!.map((h) => h.toLowerCase());
   const frontIdx = header.findIndex((h) => FRONT_KEYS.includes(h));
   const backIdx = header.findIndex((h) => BACK_KEYS.includes(h));
   const hasHeader = frontIdx !== -1 && backIdx !== -1;

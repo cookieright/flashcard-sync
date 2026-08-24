@@ -5,7 +5,7 @@ export type Card = {
   id: string;
   front: string;
   back: string;
-  hint?: string;
+  hint?: string | undefined;
   /** spaced repetition state */
   box: number; // 0..5
   due: number; // epoch ms
@@ -69,7 +69,7 @@ export function gradeCard(card: Card, known: boolean): Card {
     box,
     reviews: card.reviews + 1,
     lapses: known ? card.lapses : card.lapses + 1,
-    due: Date.now() + INTERVALS_MIN[box] * 60 * 1000,
+    due: Date.now() + INTERVALS_MIN[box]! * 60 * 1000,
   };
 }
 
