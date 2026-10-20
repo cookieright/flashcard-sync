@@ -46,7 +46,7 @@ function Home() {
     <main className="mx-auto min-h-screen w-full max-w-2xl px-5 pb-24 pt-10">
       <header className="mb-8">
         <p className="text-xs uppercase tracking-[0.28em] text-muted-foreground">FLASHCARDS</p>
-        <h1 className="mt-2 text-4xl leading-tight tracking-tight">毛毛背词语</h1>
+        <h1 className="mt-2 text-4xl leading-tight tracking-tight">(╬ Ò ‸ Ó)σ 乖乖背词语</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           这个app会自动帮你复习词语！
         </p>
