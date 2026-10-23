@@ -7,7 +7,7 @@ import { oauthReturnPath } from "@/lib/oauth-return-path";
 import "@lovable.dev/cloud-auth-js/styles.css";
 
 export const Route = createFileRoute("/login")({
-  validateSearch: (s: Record<string, unknown>) => ({ next: oauthReturnPath(s.next) }),
+  validateSearch: (s: Record<string, unknown>) => ({ next: oauthReturnPath(s['next']) }),
   head: () => ({ meta: [
     { title: "助手连接登录 — FLASHCARDS" },
     { name: "description", content: "登录以授权助手连接 Word Flash Companion。" },
