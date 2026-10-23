@@ -1,5 +1,12 @@
 import { useCallback, useRef, useState } from "react";
 
+declare global {
+  interface Window {
+    /** Set only inside the Android app (android-app/src/native-speech.ts). */
+    __flashwordsNativeSpeak?: (text: string, lang: string) => Promise<void>;
+  }
+}
+
 /** Guess a language code for Google Translate TTS from the text itself. */
 export function guessLang(text: string): string {
   if (/[\u4e00-\u9fff]/.test(text)) return "zh-CN";
@@ -24,6 +31,16 @@ export function useSpeak() {
     audioRef.current?.pause();
 
     const language = lang ?? guessLang(value);
+
+    const nativeSpeak = typeof window !== "undefined" ? window.__flashwordsNativeSpeak : undefined;
+    if (nativeSpeak) {
+      setSpeaking(true);
+      void nativeSpeak(value, language)
+        .catch(() => {})
+        .finally(() => setSpeaking(false));
+      return;
+    }
+
     const audio = new Audio(ttsUrl(value, language));
     audioRef.current = audio;
     setSpeaking(true);

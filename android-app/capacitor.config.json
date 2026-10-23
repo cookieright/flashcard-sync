@@ -1,0 +1,8 @@
+{
+  "appId": "app.flashwords.cards",
+  "appName": "词卡",
+  "webDir": "dist",
+  "android": {
+    "allowMixedContent": false
+  }
+}

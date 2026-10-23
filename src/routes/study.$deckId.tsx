@@ -1,7 +1,16 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Check, RotateCcw, Volume2, X } from "lucide-react";
-import { useDecks, gradeCard, dueCards, type Card } from "@/lib/decks";
+import { ArrowLeft, Check, Plus, RotateCcw, Volume2, X } from "lucide-react";
+import { useDecks, gradeCard, type Card } from "@/lib/decks";
+import {
+  buildSession,
+  formatWhen,
+  isNew,
+  newCards,
+  nextReviewAt,
+  recordAnswer,
+  useStudyPlan,
+} from "@/lib/study-plan";
 import { useSpeak } from "@/lib/tts";
 import { useWebMCP } from "use-webmcp-tool";
 import { runWebMCPTool } from "@/lib/webmcp-telemetry";
@@ -28,14 +37,17 @@ function StudyPage() {
   const [queue, setQueue] = useState<string[] | null>(null);
   const [flipped, setFlipped] = useState(false);
   const [stats, setStats] = useState({ known: 0, again: 0 });
+  const [sessionSize, setSessionSize] = useState(0);
+  const [practice, setPractice] = useState(false);
+  const { settings, today } = useStudyPlan();
   const [autoPlay, setAutoPlay] = useState(true);
   const { speak, speaking } = useSpeak();
 
   useEffect(() => {
     if (!deck || queue !== null) return;
-    const due = dueCards(deck);
-    const pool = due.length > 0 ? due : deck.cards;
-    setQueue(shuffle(pool.map((c) => c.id)));
+    const session = buildSession(deck);
+    setSessionSize(session.length);
+    setQueue(session.map((c) => c.id));
   }, [deck, queue]);
 
   const current: Card | undefined = useMemo(() => {
@@ -71,17 +83,30 @@ function StudyPage() {
 
   function answer(known: boolean) {
     if (!current || !queue) return;
-    updateDeck(deckId, (d) => ({
-      ...d,
-      cards: d.cards.map((c) => (c.id === current.id ? gradeCard(c, known) : c)),
-    }));
+    if (!practice) {
+      recordAnswer(isNew(current));
+      updateDeck(deckId, (d) => ({
+        ...d,
+        cards: d.cards.map((c) => (c.id === current.id ? gradeCard(c, known) : c)),
+      }));
+    }
     setStats((s) => ({ known: s.known + (known ? 1 : 0), again: s.again + (known ? 0 : 1) }));
     setFlipped(false);
     setQueue(known ? queue.slice(1) : [...queue.slice(1), queue[0]!]);
   }
 
-  const total = deck.cards.length;
+  const total = sessionSize;
   const remaining = queue?.length ?? 0;
+  const freshLeft = newCards(deck).length;
+  const next = nextReviewAt([deck]);
+
+  function startRound(ids: string[], asPractice = false) {
+    setPractice(asPractice);
+    setStats({ known: 0, again: 0 });
+    setFlipped(false);
+    setSessionSize(ids.length);
+    setQueue(ids);
+  }
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-2xl flex-col px-5 pb-8 pt-6">
@@ -107,19 +132,39 @@ function StudyPage() {
       {!current ? (
         <div className="flex flex-1 flex-col items-center justify-center text-center">
           <p className="text-3xl">🎉</p>
-          <h1 className="mt-4 text-2xl">这一轮完成了</h1>
+          <h1 className="mt-4 text-2xl">
+            {total > 0 ? "这一轮完成了" : "今天这个词库的任务完成了"}
+          </h1>
+          {total > 0 && (
+            <p className="mt-2 text-sm text-muted-foreground">
+              记住 {stats.known} 次 · 需重来 {stats.again} 次
+            </p>
+          )}
           <p className="mt-2 text-sm text-muted-foreground">
-            记住 {stats.known} 次 · 需重来 {stats.again} 次
+            今日新词 {Math.min(today.learned, settings.dailyGoal)}/{settings.dailyGoal}
+            {today.learned > settings.dailyGoal && `（超额 ${today.learned - settings.dailyGoal}）`}
+            {" · "}复习 {today.reviewed} 次
           </p>
-          <div className="mt-8 flex gap-3">
+          {next && (
+            <p className="mt-1 text-xs text-muted-foreground">下一次复习：{formatWhen(next)}</p>
+          )}
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            {freshLeft > 0 && (
+              <button
+                onClick={() => startRound(newCards(deck).slice(0, 5).map((c) => c.id))}
+                className="flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-medium text-primary-foreground"
+              >
+                <Plus className="size-4" /> 再学 5 个新词
+              </button>
+            )}
             <button
-              onClick={() => {
-                setStats({ known: 0, again: 0 });
-                setQueue(shuffle(deck.cards.map((c) => c.id)));
-              }}
-              className="flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-medium text-primary-foreground"
+              onClick={() =>
+                startRound(shuffle(deck.cards.filter((c) => !isNew(c)).map((c) => c.id)), true)
+              }
+              disabled={deck.cards.every(isNew)}
+              className="flex items-center gap-2 rounded-full bg-secondary px-5 py-3 text-sm font-medium text-secondary-foreground disabled:opacity-50"
             >
-              <RotateCcw className="size-4" /> 再来一轮
+              <RotateCcw className="size-4" /> 自由练习学过的词
             </button>
             <Link
               to="/"
@@ -139,6 +184,9 @@ function StudyPage() {
               aria-label="翻转卡片"
             >
               <Face>
+                <span className="absolute left-5 top-5 rounded-full bg-secondary px-2.5 py-1 text-[11px] text-muted-foreground">
+                  {practice ? "自由练习" : isNew(current) ? "新词" : "复习"}
+                </span>
                 <p className="text-3xl leading-snug sm:text-4xl">{current.front}</p>
                 <p className="mt-6 text-xs uppercase tracking-[0.2em] text-muted-foreground">
                   点击查看释义

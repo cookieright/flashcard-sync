@@ -22,7 +22,26 @@ export type Deck = {
 
 const STORAGE_KEY = "flashwords.decks.v1";
 
-const INTERVALS_MIN = [0, 10, 60 * 24, 60 * 24 * 3, 60 * 24 * 7, 60 * 24 * 21];
+/**
+ * Review intervals following the Ebbinghaus forgetting curve:
+ * 5 min → 30 min → 12 h → 1 d → 2 d → 4 d → 7 d → 15 d → 30 d.
+ * "记住了" moves a card one step up; "还不熟" sends it back to the start.
+ */
+export const INTERVALS_MIN = [
+  0,
+  5,
+  30,
+  60 * 12,
+  60 * 24,
+  60 * 24 * 2,
+  60 * 24 * 4,
+  60 * 24 * 7,
+  60 * 24 * 15,
+  60 * 24 * 30,
+];
+
+/** Cards at or beyond this step (passed the 4-day review) count as mastered. */
+export const MASTERED_BOX = 6;
 
 export function loadDecks(): Deck[] {
   if (typeof window === "undefined") return [];
@@ -63,7 +82,7 @@ export function makeDeck(name: string, cards: CsvCard[]): Deck {
 }
 
 export function gradeCard(card: Card, known: boolean): Card {
-  const box = known ? Math.min(card.box + 1, INTERVALS_MIN.length - 1) : 0;
+  const box = known ? Math.min(card.box + 1, INTERVALS_MIN.length - 1) : 1;
   return {
     ...card,
     box,
@@ -73,13 +92,14 @@ export function gradeCard(card: Card, known: boolean): Card {
   };
 }
 
+/** Studied cards whose next review time has arrived (never-studied cards are not "due"). */
 export function dueCards(deck: Deck, now = Date.now()) {
-  return deck.cards.filter((c) => c.due <= now);
+  return deck.cards.filter((c) => c.reviews > 0 && c.due <= now);
 }
 
 export function deckProgress(deck: Deck) {
   if (deck.cards.length === 0) return 0;
-  const mastered = deck.cards.filter((c) => c.box >= 4).length;
+  const mastered = deck.cards.filter((c) => c.box >= MASTERED_BOX).length;
   return Math.round((mastered / deck.cards.length) * 100);
 }
 

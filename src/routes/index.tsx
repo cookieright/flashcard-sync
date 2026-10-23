@@ -3,6 +3,8 @@ import { useRef, useState } from "react";
 import { BookOpen, Plus, Trash2, Upload, FileSpreadsheet } from "lucide-react";
 import { parseCsv, rowsToCards } from "@/lib/csv";
 import { useDecks, makeDeck, dueCards, deckProgress } from "@/lib/decks";
+import { newCards, useStudyPlan } from "@/lib/study-plan";
+import { StudySettings } from "@/components/study-settings";
 import { useWebMCP } from "use-webmcp-tool";
 import { runWebMCPTool } from "@/lib/webmcp-telemetry";
 
@@ -30,6 +32,10 @@ function Home() {
   const { decks, ready, addDeck, removeDeck } = useDecks();
   const fileRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
+  const { settings, today, streak } = useStudyPlan();
+  const totalDue = decks.reduce((n, d) => n + dueCards(d).length, 0);
+  const totalNew = decks.reduce((n, d) => n + newCards(d).length, 0);
+  const goalPct = Math.min(100, Math.round((today.learned / settings.dailyGoal) * 100));
 
   useWebMCP({
     name: "list_visible_decks",
@@ -57,12 +63,36 @@ function Home() {
   return (
     <main className="mx-auto min-h-screen w-full max-w-2xl px-5 pb-24 pt-10">
       <header className="mb-8">
-        <p className="text-xs uppercase tracking-[0.28em] text-muted-foreground">FLASHCARDS</p>
+        <div className="flex items-center justify-between gap-4">
+          <p className="text-xs uppercase tracking-[0.28em] text-muted-foreground">FLASHCARDS</p>
+          <StudySettings />
+        </div>
         <h1 className="mt-2 text-4xl leading-tight tracking-tight">(╬ Ò ‸ Ó)σ 乖乖背词语</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           这个app会自动帮你复习词语！
         </p>
       </header>
+
+      {ready && decks.length > 0 && (
+        <section className="mb-6 rounded-3xl bg-card p-5 shadow-card" aria-label="今日进度">
+          <div className="flex items-baseline justify-between gap-4">
+            <h2 className="text-sm font-medium">今日目标</h2>
+            {streak > 0 && <span className="text-xs text-muted-foreground">已连续 {streak} 天</span>}
+          </div>
+          <p className="mt-2 text-3xl tabular-nums">
+            {Math.min(today.learned, settings.dailyGoal)}
+            <span className="text-base text-muted-foreground"> / {settings.dailyGoal} 个新词</span>
+          </p>
+          <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-secondary">
+            <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${goalPct}%` }} />
+          </div>
+          <p className="mt-3 text-xs text-muted-foreground">
+            {totalDue > 0 ? <span className="text-accent-foreground">{totalDue} 个词语待复习</span> : "暂无到期复习"}
+            {" · "}今天已复习 {today.reviewed} 次
+            {totalNew === 0 && " · 新词已全部学完"}
+          </p>
+        </section>
+      )}
 
       <label
         className="flex cursor-pointer flex-col items-center gap-3 rounded-3xl border border-dashed border-border bg-card px-6 py-10 text-center shadow-card transition-colors hover:border-primary/60"
@@ -110,6 +140,7 @@ function Home() {
           <ul className="space-y-3">
             {decks.map((deck) => {
               const due = dueCards(deck).length;
+              const fresh = newCards(deck).length;
               const progress = deckProgress(deck);
               return (
                 <li
@@ -125,7 +156,8 @@ function Home() {
                       <p className="truncate text-lg font-medium">{deck.name}</p>
                       <p className="mt-1 text-xs text-muted-foreground">
                         {deck.cards.length} 张卡片 · 已掌握 {progress}%
-                        {due > 0 && <span className="text-accent-foreground"> · {due} 张待复习</span>}
+                        {due > 0 && <span className="text-accent-foreground"> · {due} 个待复习</span>}
+                        {fresh > 0 && <span> · {fresh} 个新词</span>}
                       </p>
                       <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-secondary">
                         <div
