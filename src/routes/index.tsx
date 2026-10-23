@@ -3,6 +3,8 @@ import { useRef, useState } from "react";
 import { BookOpen, Plus, Trash2, Upload, FileSpreadsheet } from "lucide-react";
 import { parseCsv, rowsToCards } from "@/lib/csv";
 import { useDecks, makeDeck, dueCards, deckProgress } from "@/lib/decks";
+import { useWebMCP } from "use-webmcp-tool";
+import { runWebMCPTool } from "@/lib/webmcp-telemetry";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -17,6 +19,8 @@ export const Route = createFileRoute("/")({
         property: "og:description",
         content: "导入 CSV 单词表，生成翻转卡片，用间隔重复高效记单词。",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Home,
@@ -26,6 +30,14 @@ function Home() {
   const { decks, ready, addDeck, removeDeck } = useDecks();
   const fileRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useWebMCP({
+    name: "list_visible_decks",
+    description: "Read the decks and review counts shown on the current library screen; no changes are made.",
+    enabled: ready,
+    annotations: { readOnlyHint: true, untrustedContentHint: true },
+    execute: () => runWebMCPTool("list_visible_decks", () => decks.length === 0 ? "No decks shown." : decks.map((deck) => `${deck.id}: ${deck.name}; ${deck.cards.length} cards; ${dueCards(deck).length} due; ${deckProgress(deck)}% mastered.`).join("\n")),
+  });
 
   async function handleFile(file: File) {
     setError(null);

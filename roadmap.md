@@ -1,0 +1,3 @@
+- [ ] Add OAuth-protected CSV parsing MCP tool without moving local decks.
+- [ ] Add page-local read tools for decks and study cards.
+- [ ] Verify consent/login paths, manifest, and security package update.
