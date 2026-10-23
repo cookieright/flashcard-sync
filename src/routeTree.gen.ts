@@ -10,6 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as McpRouteImport } from './routes/mcp'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as StudyDeckIdRouteImport } from './routes/study.$deckId'
 import { Route as ApiPublicTtsRouteImport } from './routes/api/public/tts'
 
@@ -18,6 +20,17 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const StudyDeckIdRoute = StudyDeckIdRouteImport.update({
   id: '/study/$deckId',
   path: '/study/$deckId',
@@ -31,30 +44,54 @@ const ApiPublicTtsRoute = ApiPublicTtsRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/mcp': typeof McpRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/study/$deckId': typeof StudyDeckIdRoute
   '/api/public/tts': typeof ApiPublicTtsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/mcp': typeof McpRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/study/$deckId': typeof StudyDeckIdRoute
   '/api/public/tts': typeof ApiPublicTtsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/mcp': typeof McpRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/study/$deckId': typeof StudyDeckIdRoute
   '/api/public/tts': typeof ApiPublicTtsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/study/$deckId' | '/api/public/tts'
+  fullPaths:
+    | '/'
+    | '/mcp'
+    | '/.well-known/oauth-protected-resource'
+    | '/study/$deckId'
+    | '/api/public/tts'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/study/$deckId' | '/api/public/tts'
-  id: '__root__' | '/' | '/study/$deckId' | '/api/public/tts'
+  to:
+    | '/'
+    | '/mcp'
+    | '/.well-known/oauth-protected-resource'
+    | '/study/$deckId'
+    | '/api/public/tts'
+  id:
+    | '__root__'
+    | '/'
+    | '/mcp'
+    | '/.well-known/oauth-protected-resource'
+    | '/study/$deckId'
+    | '/api/public/tts'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  McpRoute: typeof McpRoute
+  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   StudyDeckIdRoute: typeof StudyDeckIdRoute
   ApiPublicTtsRoute: typeof ApiPublicTtsRoute
 }
@@ -66,6 +103,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/study/$deckId': {
@@ -87,6 +138,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  McpRoute: McpRoute,
+  Char91DotwellKnownChar93OauthProtectedResourceRoute:
+    Char91DotwellKnownChar93OauthProtectedResourceRoute,
   StudyDeckIdRoute: StudyDeckIdRoute,
   ApiPublicTtsRoute: ApiPublicTtsRoute,
 }
