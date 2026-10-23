@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "sdk_version": "3.3.0",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://vghbhkfzsrbvaedbxwci.supabase.co/auth/v1",
+    "require_oauth_client_claim": true,
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "word-flash-companion",
+      "version": "0.1.0",
+      "title": "Word Flash Companion"
+    },
+    "tools": [
+      {
+        "name": "parse_flashcards_csv",
+        "title": "Parse flashcards CSV",
+        "description": "Parse CSV text supplied by the caller into word, meaning and optional example cards; does not read or save browser decks.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "csv": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100000,
+              "description": "CSV text to parse, up to 100,000 characters."
+            }
+          },
+          "required": [
+            "csv"
+          ],
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
