@@ -3,6 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Check, RotateCcw, Volume2, X } from "lucide-react";
 import { useDecks, gradeCard, dueCards, type Card } from "@/lib/decks";
 import { useSpeak } from "@/lib/tts";
+import { useWebMCP } from "use-webmcp-tool";
+import { runWebMCPTool } from "@/lib/webmcp-telemetry";
 
 export const Route = createFileRoute("/study/$deckId")({
   head: () => ({
@@ -11,6 +13,8 @@ export const Route = createFileRoute("/study/$deckId")({
       { name: "description", content: "翻转卡片，标记记得或忘记，系统自动安排下次复习时间。" },
       { property: "og:title", content: "学习中 — 词卡 FlashWords" },
       { property: "og:description", content: "翻转卡片记单词，自动安排复习。" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: StudyPage,
@@ -44,6 +48,14 @@ function StudyPage() {
     if (!autoPlay || !currentFront) return;
     speak(currentFront);
   }, [currentFront, autoPlay, speak]);
+
+  useWebMCP({
+    name: "read_current_flashcard",
+    description: "Read only the current visible side of the study card and remaining card count, without revealing the hidden answer.",
+    enabled: ready && Boolean(deck) && queue !== null,
+    annotations: { readOnlyHint: true, untrustedContentHint: true },
+    execute: () => runWebMCPTool("read_current_flashcard", () => current ? `${current.id}: ${flipped ? current.back : current.front}${flipped && current.hint ? `; ${current.hint}` : ""}; remaining: ${queue?.length ?? 0}.` : "Study round complete."),
+  });
 
   if (!ready) return null;
 
