@@ -11,6 +11,8 @@ export type Card = {
   due: number; // epoch ms
   lapses: number;
   reviews: number;
+  /** last local change, epoch ms (used for cloud sync merge) */
+  updatedAt?: number;
 };
 
 export type Deck = {
@@ -18,6 +20,13 @@ export type Deck = {
   name: string;
   createdAt: number;
   cards: Card[];
+  updatedAt?: number;
+  /** soft delete, kept locally so the deletion can sync */
+  deleted?: boolean;
+  /** set when this deck came from an admin-shared deck */
+  sharedDeckId?: string | null;
+  /** user chose not to upload this deck to their account */
+  localOnly?: boolean;
 };
 
 const STORAGE_KEY = "flashwords.decks.v1";
@@ -43,7 +52,13 @@ export const INTERVALS_MIN = [
 /** Cards at or beyond this step (passed the 4-day review) count as mastered. */
 export const MASTERED_BOX = 6;
 
+/** Visible (non-deleted) decks. */
 export function loadDecks(): Deck[] {
+  return loadAllDecks().filter((d) => !d.deleted);
+}
+
+/** All decks including soft-deleted tombstones. */
+export function loadAllDecks(): Deck[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
@@ -53,10 +68,18 @@ export function loadDecks(): Deck[] {
   }
 }
 
-export function saveDecks(decks: Deck[]) {
+/** Writes all decks (including tombstones). `dirty` marks a user change that should sync. */
+export function saveAllDecks(decks: Deck[], dirty = true) {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(decks));
   window.dispatchEvent(new Event("flashwords:change"));
+  if (dirty) window.dispatchEvent(new Event("flashwords:dirty"));
+}
+
+/** Replace visible decks, keeping tombstones. */
+export function saveDecks(decks: Deck[]) {
+  const ids = new Set(decks.map((d) => d.id));
+  saveAllDecks([...decks, ...loadAllDecks().filter((d) => d.deleted && !ids.has(d.id))]);
 }
 
 function uid() {
@@ -64,10 +87,12 @@ function uid() {
 }
 
 export function makeDeck(name: string, cards: CsvCard[]): Deck {
+  const now = Date.now();
   return {
     id: uid(),
     name,
-    createdAt: Date.now(),
+    createdAt: now,
+    updatedAt: now,
     cards: cards.map((c) => ({
       id: uid(),
       front: c.front,
@@ -77,6 +102,7 @@ export function makeDeck(name: string, cards: CsvCard[]): Deck {
       due: Date.now(),
       lapses: 0,
       reviews: 0,
+      updatedAt: now,
     })),
   };
 }
@@ -89,6 +115,7 @@ export function gradeCard(card: Card, known: boolean): Card {
     reviews: card.reviews + 1,
     lapses: known ? card.lapses : card.lapses + 1,
     due: Date.now() + INTERVALS_MIN[box]! * 60 * 1000,
+    updatedAt: Date.now(),
   };
 }
 
@@ -121,15 +148,17 @@ export function useDecks() {
   }, []);
 
   const addDeck = useCallback((deck: Deck) => {
-    saveDecks([deck, ...loadDecks()]);
+    saveAllDecks([deck, ...loadAllDecks()]);
   }, []);
 
   const removeDeck = useCallback((id: string) => {
-    saveDecks(loadDecks().filter((d) => d.id !== id));
+    saveAllDecks(
+      loadAllDecks().map((d) => (d.id === id ? { ...d, deleted: true, updatedAt: Date.now() } : d)),
+    );
   }, []);
 
   const updateDeck = useCallback((id: string, fn: (d: Deck) => Deck) => {
-    saveDecks(loadDecks().map((d) => (d.id === id ? fn(d) : d)));
+    saveAllDecks(loadAllDecks().map((d) => (d.id === id ? fn(d) : d)));
   }, []);
 
   return { decks, ready, addDeck, removeDeck, updateDeck };

@@ -14,16 +14,267 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      cards: {
+        Row: {
+          back: string
+          box: number
+          deck_id: string
+          due: number
+          front: string
+          hint: string | null
+          id: string
+          lapses: number
+          owner_id: string
+          reviews: number
+          updated_at: number
+        }
+        Insert: {
+          back?: string
+          box?: number
+          deck_id: string
+          due?: number
+          front?: string
+          hint?: string | null
+          id: string
+          lapses?: number
+          owner_id: string
+          reviews?: number
+          updated_at?: number
+        }
+        Update: {
+          back?: string
+          box?: number
+          deck_id?: string
+          due?: number
+          front?: string
+          hint?: string | null
+          id?: string
+          lapses?: number
+          owner_id?: string
+          reviews?: number
+          updated_at?: number
+        }
+        Relationships: []
+      }
+      daily_logs: {
+        Row: {
+          day: string
+          learned: number
+          reviewed: number
+          user_id: string
+        }
+        Insert: {
+          day: string
+          learned?: number
+          reviewed?: number
+          user_id: string
+        }
+        Update: {
+          day?: string
+          learned?: number
+          reviewed?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      deck_assignments: {
+        Row: {
+          id: string
+          shared_deck_id: string
+          user_id: string | null
+        }
+        Insert: {
+          id?: string
+          shared_deck_id: string
+          user_id?: string | null
+        }
+        Update: {
+          id?: string
+          shared_deck_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deck_assignments_shared_deck_id_fkey"
+            columns: ["shared_deck_id"]
+            isOneToOne: false
+            referencedRelation: "shared_decks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      decks: {
+        Row: {
+          created_at: number
+          deleted: boolean
+          id: string
+          name: string
+          owner_id: string
+          shared_deck_id: string | null
+          updated_at: number
+        }
+        Insert: {
+          created_at?: number
+          deleted?: boolean
+          id: string
+          name?: string
+          owner_id: string
+          shared_deck_id?: string | null
+          updated_at?: number
+        }
+        Update: {
+          created_at?: number
+          deleted?: boolean
+          id?: string
+          name?: string
+          owner_id?: string
+          shared_deck_id?: string | null
+          updated_at?: number
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          disabled: boolean
+          display_name: string | null
+          email: string | null
+          id: string
+          last_active_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          disabled?: boolean
+          display_name?: string | null
+          email?: string | null
+          id: string
+          last_active_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          disabled?: boolean
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          last_active_at?: string | null
+        }
+        Relationships: []
+      }
+      shared_cards: {
+        Row: {
+          back: string
+          front: string
+          hint: string | null
+          id: string
+          shared_deck_id: string
+        }
+        Insert: {
+          back?: string
+          front?: string
+          hint?: string | null
+          id?: string
+          shared_deck_id: string
+        }
+        Update: {
+          back?: string
+          front?: string
+          hint?: string | null
+          id?: string
+          shared_deck_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_cards_shared_deck_id_fkey"
+            columns: ["shared_deck_id"]
+            isOneToOne: false
+            referencedRelation: "shared_decks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shared_decks: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_settings: {
+        Row: {
+          daily_goal: number
+          reminder_enabled: boolean
+          reminder_time: string
+          updated_at: number
+          user_id: string
+        }
+        Insert: {
+          daily_goal?: number
+          reminder_enabled?: boolean
+          reminder_time?: string
+          updated_at?: number
+          user_id: string
+        }
+        Update: {
+          daily_goal?: number
+          reminder_enabled?: boolean
+          reminder_time?: string
+          updated_at?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      can_read_shared_deck: {
+        Args: { _deck: string; _user_id: string }
+        Returns: boolean
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_active_user: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +401,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const

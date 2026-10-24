@@ -11,6 +11,7 @@ export default defineConfig({
   root: here("."),
   base: "./",
   publicDir: here("../public"),
+  envDir: here(".."),
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: { "@": here("../src") },

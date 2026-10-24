@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { BellRing, Settings2 } from "lucide-react";
+import { BellRing, ChevronRight, Cloud, Settings2 } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import {
   Sheet,
   SheetContent,
@@ -45,7 +46,21 @@ export function StudySettings() {
           <SheetDescription>随时可以修改，立即生效。</SheetDescription>
         </SheetHeader>
 
-        <section className="mt-2">
+        <Link
+          to="/account"
+          className="mt-2 flex items-center gap-3 rounded-3xl bg-secondary/50 p-4 transition-colors hover:bg-secondary"
+        >
+          <span className="flex size-9 items-center justify-center rounded-2xl bg-card text-primary">
+            <Cloud className="size-4" />
+          </span>
+          <span className="flex-1">
+            <span className="block text-sm font-medium">账号与同步</span>
+            <span className="block text-xs text-muted-foreground">登录后，词库和进度在所有设备同步</span>
+          </span>
+          <ChevronRight className="size-4 text-muted-foreground" />
+        </Link>
+
+        <section className="mt-7">
           <h3 className="text-sm font-medium">每日新词目标</h3>
           <p className="mt-1 text-xs text-muted-foreground">
             每天学习多少个新词语。到期的复习词不受这个数量限制。

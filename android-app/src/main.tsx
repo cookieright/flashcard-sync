@@ -14,7 +14,9 @@ import {
 } from "@tanstack/react-router";
 import { Route as IndexFileRoute } from "@/routes/index";
 import { Route as StudyFileRoute } from "@/routes/study.$deckId";
+import { Route as AccountFileRoute } from "@/routes/account";
 import { useReminderSync } from "@/lib/study-plan";
+import { SyncHost } from "@/components/sync-host";
 import { installNativeSpeech } from "./native-speech";
 import { installNativeReminders } from "./native-reminders";
 
@@ -32,6 +34,7 @@ const rootRoute = createRootRoute({
   component: () => (
     <QueryClientProvider client={queryClient}>
       <ReminderSync />
+      <SyncHost />
       <Outlet />
     </QueryClientProvider>
   ),
@@ -42,6 +45,7 @@ const pageOf = (route: { options: unknown }) =>
 
 const routeTree = rootRoute.addChildren([
   createRoute({ getParentRoute: () => rootRoute, path: "/", component: pageOf(IndexFileRoute) }),
+  createRoute({ getParentRoute: () => rootRoute, path: "/account", component: pageOf(AccountFileRoute) }),
   createRoute({
     getParentRoute: () => rootRoute,
     path: "/study/$deckId",
