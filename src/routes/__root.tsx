@@ -8,6 +8,8 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import { ClientOnly } from "@tanstack/react-router";
+import { SyncHost } from "@/components/sync-host";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -135,6 +137,9 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <ClientOnly fallback={null}>
+        <SyncHost />
+      </ClientOnly>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
     </QueryClientProvider>
