@@ -32,7 +32,7 @@ export function mergeDecks(local: Deck[], remote: Deck[]): Deck[] {
     out.push({
       ...base,
       localOnly: l.localOnly,
-      deleted: Boolean(l.deleted || r.deleted) && base.deleted !== false ? base.deleted : base.deleted,
+      deleted: base.deleted,
       cards: mergeCards(l.cards, r.cards),
     });
   }
