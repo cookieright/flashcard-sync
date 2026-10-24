@@ -13,6 +13,8 @@ export type Settings = {
   reminderEnabled: boolean;
   /** "HH:MM", 24h, local time. */
   reminderTime: string;
+  /** last local change, epoch ms (cloud sync) */
+  updatedAt?: number;
 };
 
 const SETTINGS_KEY = "flashwords.settings.v1";
@@ -33,9 +35,10 @@ export function loadSettings(): Settings {
 }
 
 export function saveSettings(patch: Partial<Settings>) {
-  const next = { ...loadSettings(), ...patch };
+  const next = { ...loadSettings(), updatedAt: Date.now(), ...patch };
   window.localStorage.setItem(SETTINGS_KEY, JSON.stringify(next));
   window.dispatchEvent(new Event("flashwords:change"));
+  if (!("updatedAt" in patch)) window.dispatchEvent(new Event("flashwords:dirty"));
   return next;
 }
 
@@ -43,7 +46,7 @@ export function saveSettings(patch: Partial<Settings>) {
 /* Daily log                                                           */
 /* ------------------------------------------------------------------ */
 
-type DayLog = { learned: number; reviewed: number };
+export type DayLog = { learned: number; reviewed: number };
 const LOG_KEY = "flashwords.daily.v1";
 
 export function dayKey(d = new Date()) {
@@ -52,7 +55,7 @@ export function dayKey(d = new Date()) {
   return `${d.getFullYear()}-${m}-${day}`;
 }
 
-function loadLog(): Record<string, DayLog> {
+export function loadLog(): Record<string, DayLog> {
   if (typeof window === "undefined") return {};
   try {
     return JSON.parse(window.localStorage.getItem(LOG_KEY) ?? "{}") as Record<string, DayLog>;
@@ -75,6 +78,13 @@ export function recordAnswer(wasNew: boolean) {
   log[key] = day;
   // keep ~3 months of history
   for (const k of Object.keys(log).sort().slice(0, -90)) delete log[k];
+  window.localStorage.setItem(LOG_KEY, JSON.stringify(log));
+  window.dispatchEvent(new Event("flashwords:change"));
+  window.dispatchEvent(new Event("flashwords:dirty"));
+}
+
+/** Replace the daily log (used by cloud sync; not a user change). */
+export function saveLog(log: Record<string, DayLog>) {
   window.localStorage.setItem(LOG_KEY, JSON.stringify(log));
   window.dispatchEvent(new Event("flashwords:change"));
 }
