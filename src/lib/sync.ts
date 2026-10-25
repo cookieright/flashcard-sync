@@ -15,7 +15,7 @@ export type SyncStatus = {
   /** user id whose account this device is linked to */
   linkedUser?: string;
   lastSync?: number;
-  error?: string;
+  error?: string | undefined;
   syncing?: boolean;
   /** waiting for the user to answer the "upload local decks?" question */
   needsConsent?: boolean;

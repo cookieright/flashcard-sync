@@ -105,7 +105,7 @@ function AuthForm() {
           password,
           options: {
             emailRedirectTo: `${window.location.origin}/account`,
-            data: name ? { display_name: name } : undefined,
+            data: name ? { display_name: name } : {},
           },
         });
         if (error) throw error;
