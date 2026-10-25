@@ -14,6 +14,7 @@ import { Route as AccountRouteImport } from './routes/account'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as McpRouteImport } from './routes/mcp'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as StudyDeckIdRouteImport } from './routes/study.$deckId'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
@@ -44,6 +45,11 @@ const McpRoute = McpRouteImport.update({
   path: '/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const Char91DotwellKnownChar93OauthProtectedResourceRoute =
   Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
     id: '/.well-known/oauth-protected-resource',
@@ -72,6 +78,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
+  '/privacy': typeof PrivacyRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/study/$deckId': typeof StudyDeckIdRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -83,6 +90,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
+  '/privacy': typeof PrivacyRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/study/$deckId': typeof StudyDeckIdRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -95,6 +103,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
+  '/privacy': typeof PrivacyRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/study/$deckId': typeof StudyDeckIdRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -108,6 +117,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/login'
     | '/mcp'
+    | '/privacy'
     | '/.well-known/oauth-protected-resource'
     | '/study/$deckId'
     | '/.lovable/oauth/consent'
@@ -119,6 +129,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/login'
     | '/mcp'
+    | '/privacy'
     | '/.well-known/oauth-protected-resource'
     | '/study/$deckId'
     | '/.lovable/oauth/consent'
@@ -130,6 +141,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/login'
     | '/mcp'
+    | '/privacy'
     | '/.well-known/oauth-protected-resource'
     | '/study/$deckId'
     | '/.lovable/oauth/consent'
@@ -142,6 +154,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   LoginRoute: typeof LoginRoute
   McpRoute: typeof McpRoute
+  PrivacyRoute: typeof PrivacyRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   StudyDeckIdRoute: typeof StudyDeckIdRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
@@ -185,6 +198,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof McpRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/.well-known/oauth-protected-resource': {
       id: '/.well-known/oauth-protected-resource'
       path: '/.well-known/oauth-protected-resource'
@@ -222,6 +242,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   LoginRoute: LoginRoute,
   McpRoute: McpRoute,
+  PrivacyRoute: PrivacyRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   StudyDeckIdRoute: StudyDeckIdRoute,

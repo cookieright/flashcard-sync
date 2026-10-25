@@ -140,6 +140,11 @@ export function StudySettings() {
           )}
           {notice && <p className="mt-3 text-xs text-destructive">{notice}</p>}
         </section>
+        <p className="mt-6 text-center text-xs text-muted-foreground">
+          <Link to="/privacy" className="underline hover:text-primary">
+            隐私说明
+          </Link>
+        </p>
       </SheetContent>
     </Sheet>
   );

@@ -83,6 +83,13 @@ export function AccountPage() {
       ) : (
         <AuthForm />
       )}
+      <p className="mt-10 text-center text-xs text-muted-foreground">
+        登录即表示你已阅读{" "}
+        <Link to="/privacy" className="underline hover:text-primary">
+          隐私说明
+        </Link>
+        ，了解数据如何保存和删除。
+      </p>
     </main>
   );
 }
