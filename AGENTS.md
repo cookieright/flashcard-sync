@@ -9,7 +9,9 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
-- Keep flashcard decks browser-local; remote MCP tools only transform caller-supplied CSV, so integrations never silently migrate or expose local study data.
+- Flashcard decks are browser-local first (cloud sync is opt-in per account); remote MCP tools only transform caller-supplied CSV, so integrations never silently migrate or expose local study data.
 - Define OAuth-protected remote tools in src/lib/mcp and let the SDK Vite plugin generate transport routes, keeping authorization separate from browser tools.
 - Register read-only WebMCP tools in their owning screens and wrap execution with the shared telemetry helper, preserving visible-state boundaries and normal UI behavior.
 - Preserve sanitized same-origin consent return paths through all login and signup methods, so delegated access completes without external redirect risks.
+- Cloud sync (src/lib/sync.ts) runs only in the browser via the Supabase client and RLS, never server functions, because the same code ships in the serverless Android app; localStorage stays the source of truth.
+- Merge rules live in src/lib/sync-merge.ts (pure, tested); local writes stamp updatedAt and emit `flashwords:dirty` to trigger debounced sync, while sync writes do not.
