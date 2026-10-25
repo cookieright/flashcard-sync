@@ -31,10 +31,11 @@ export function AccountPage() {
   const status = useSyncStatus();
 
   useEffect(() => {
-    void supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user);
-      setReady(true);
-    });
+    void supabase.auth
+      .getSession()
+      .then(({ data }) => setUser(data.session?.user ?? null))
+      .catch(() => setUser(null))
+      .finally(() => setReady(true));
     const { data } = supabase.auth.onAuthStateChange((_e, s) => setUser(s?.user ?? null));
     return () => data.subscription.unsubscribe();
   }, []);
