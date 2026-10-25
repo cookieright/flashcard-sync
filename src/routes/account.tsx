@@ -105,7 +105,7 @@ function AuthForm() {
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/account`,
+            emailRedirectTo: `${siteOrigin()}/account`,
             data: name ? { display_name: name } : {},
           },
         });
@@ -147,4 +147,10 @@ function AuthForm() {
       </Button>
     </form>
   );
+}
+
+/** Inside the Android app the page origin is https://localhost, which email links can't open. */
+function siteOrigin() {
+  const native = (window as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor?.isNativePlatform?.();
+  return native ? "https://flashcard-sync.lovable.app" : window.location.origin;
 }
