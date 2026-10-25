@@ -1,10 +1,20 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Cloud, RefreshCw } from "lucide-react";
+import { ArrowLeft, Cloud, RefreshCw, Trash2 } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { syncNow, useSyncStatus } from "@/lib/sync";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/account")({
   head: () => ({
@@ -72,13 +82,14 @@ export function AccountPage() {
           </div>
           {isAdmin && (
             <Button asChild variant="outline" className="w-full">
-              <a href="/admin">打开管理后台</a>
+              <a href={`${siteOrigin()}/admin`}>打开管理后台</a>
             </Button>
           )}
           <Button variant="ghost" className="w-full" onClick={() => void supabase.auth.signOut()}>
             退出登录
           </Button>
           <p className="text-xs text-muted-foreground">退出后，本机词库仍然保留，可以继续离线学习。</p>
+          <DeleteAccount />
         </section>
       ) : (
         <AuthForm />
@@ -160,4 +171,103 @@ function AuthForm() {
 function siteOrigin() {
   const native = (window as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor?.isNativePlatform?.();
   return native ? "https://flashcard-sync.lovable.app" : window.location.origin;
+}
+
+const CONFIRM_WORD = "删除";
+
+/** Permanently deletes the signed-in account and its cloud data; decks on this device are kept. */
+function DeleteAccount() {
+  const [open, setOpen] = useState(false);
+  const [typed, setTyped] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [done, setDone] = useState(false);
+
+  async function confirmDelete() {
+    setBusy(true);
+    setError(null);
+    const { error: err } = await supabase.rpc("delete_my_account");
+    if (err) {
+      setBusy(false);
+      setError(
+        err.message.includes("last_admin")
+          ? "你是唯一的管理员，不能删除账号。请先把另一个账号设为管理员。"
+          : err.message.includes("delete_my_account")
+            ? "删除功能暂时不可用，请稍后再试，或发邮件联系我们删除。"
+            : `删除失败：${err.message}`,
+      );
+      return;
+    }
+    try {
+      localStorage.removeItem("flashwords.sync.v1");
+    } catch {
+      // ignore
+    }
+    await supabase.auth.signOut().catch(() => {});
+    setBusy(false);
+    setDone(true);
+  }
+
+  if (done) {
+    return (
+      <p role="status" className="rounded-2xl bg-secondary px-4 py-3 text-sm">
+        账号和云端数据已删除。本机词库仍然保留。
+      </p>
+    );
+  }
+
+  return (
+    <AlertDialog
+      open={open}
+      onOpenChange={(v) => {
+        setOpen(v);
+        if (!v) {
+          setTyped("");
+          setError(null);
+        }
+      }}
+    >
+      <AlertDialogTrigger asChild>
+        <Button variant="ghost" className="w-full text-destructive hover:text-destructive">
+          <Trash2 className="size-4" /> 删除账号
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>永久删除账号？</AlertDialogTitle>
+          <AlertDialogDescription asChild>
+            <div className="space-y-2 text-left">
+              <p>将永久删除这个账号，以及保存在云端的全部词库、学习进度、每日记录和设置，无法恢复。</p>
+              <p>这台设备上的词库会保留，你仍然可以不登录继续使用。</p>
+              <p>
+                请输入「{CONFIRM_WORD}」确认：
+              </p>
+            </div>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <input
+          value={typed}
+          onChange={(e) => setTyped(e.target.value)}
+          placeholder={CONFIRM_WORD}
+          aria-label={`输入${CONFIRM_WORD}确认`}
+          className="w-full rounded-xl border border-input bg-background px-3 py-2 text-base"
+        />
+        {error && (
+          <p role="alert" className="text-sm text-destructive">
+            {error}
+          </p>
+        )}
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={busy}>取消</AlertDialogCancel>
+          <Button
+            variant="destructive"
+            disabled={typed.trim() !== CONFIRM_WORD || busy}
+            onClick={() => void confirmDelete()}
+          >
+            {busy ? "删除中…" : "永久删除"}
+          </Button>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
 }

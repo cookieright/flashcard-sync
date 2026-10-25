@@ -260,6 +260,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      delete_my_account: { Args: never; Returns: undefined }
       can_read_shared_deck: {
         Args: { _deck: string; _user_id: string }
         Returns: boolean
