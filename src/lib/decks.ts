@@ -12,7 +12,7 @@ export type Card = {
   lapses: number;
   reviews: number;
   /** last local change, epoch ms (used for cloud sync merge) */
-  updatedAt?: number;
+  updatedAt?: number | undefined;
 };
 
 export type Deck = {
@@ -20,13 +20,13 @@ export type Deck = {
   name: string;
   createdAt: number;
   cards: Card[];
-  updatedAt?: number;
+  updatedAt?: number | undefined;
   /** soft delete, kept locally so the deletion can sync */
-  deleted?: boolean;
+  deleted?: boolean | undefined;
   /** set when this deck came from an admin-shared deck */
-  sharedDeckId?: string | null;
+  sharedDeckId?: string | null | undefined;
   /** user chose not to upload this deck to their account */
-  localOnly?: boolean;
+  localOnly?: boolean | undefined;
 };
 
 const STORAGE_KEY = "flashwords.decks.v1";

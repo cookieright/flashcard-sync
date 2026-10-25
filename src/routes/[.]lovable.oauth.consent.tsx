@@ -30,7 +30,7 @@ export const Route = createFileRoute("/.lovable/oauth/consent")({
     if (!data || !("client" in data)) throw new Error("授权请求已过期或无效，请重新连接。");
     return data;
   },
-  errorComponent: ({ error }) => <main className="mx-auto max-w-md px-6 py-16"><h1 className="text-2xl">无法加载授权请求</h1><p role="alert" className="mt-4 text-sm text-muted-foreground">{error.message}</p><Button asChild className="mt-6"><a href="/">回到词库</a></Button></main>,
+  errorComponent: ({ error }) => <main className="mx-auto max-w-md px-6 py-16"><h1 className="text-2xl">无法加载授权请求</h1><p role="alert" className="mt-4 text-sm text-muted-foreground">{error instanceof Error ? error.message : "未知错误"}</p><Button asChild className="mt-6"><a href="/">回到词库</a></Button></main>,
   component: Consent,
 });
 
