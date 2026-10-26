@@ -15,6 +15,13 @@
       "when": 1792967589632,
       "tag": "0001_delete_my_account",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793027946455,
+      "tag": "0002_delete_my_account",
+      "breakpoints": true
     }
   ]
 }
