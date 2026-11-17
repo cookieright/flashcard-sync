@@ -18,6 +18,7 @@ import { Route as AccountFileRoute } from "@/routes/account";
 import { Route as PrivacyFileRoute } from "@/routes/privacy";
 import { useReminderSync } from "@/lib/study-plan";
 import { SyncHost } from "@/components/sync-host";
+import { LanguageSwitch } from "@/components/language-switch";
 import { installNativeSpeech } from "./native-speech";
 import { installNativeReminders } from "./native-reminders";
 
@@ -34,6 +35,7 @@ const queryClient = new QueryClient();
 const rootRoute = createRootRoute({
   component: () => (
     <QueryClientProvider client={queryClient}>
+      <LanguageSwitch />
       <ReminderSync />
       <SyncHost />
       <Outlet />
@@ -46,8 +48,16 @@ const pageOf = (route: { options: unknown }) =>
 
 const routeTree = rootRoute.addChildren([
   createRoute({ getParentRoute: () => rootRoute, path: "/", component: pageOf(IndexFileRoute) }),
-  createRoute({ getParentRoute: () => rootRoute, path: "/account", component: pageOf(AccountFileRoute) }),
-  createRoute({ getParentRoute: () => rootRoute, path: "/privacy", component: pageOf(PrivacyFileRoute) }),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/account",
+    component: pageOf(AccountFileRoute),
+  }),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/privacy",
+    component: pageOf(PrivacyFileRoute),
+  }),
   createRoute({
     getParentRoute: () => rootRoute,
     path: "/study/$deckId",

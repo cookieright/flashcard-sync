@@ -1,3 +1,4 @@
+import { t, useTranslation, currentLocale } from "@/lib/language";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Cloud, RefreshCw, Trash2 } from "lucide-react";
@@ -31,10 +32,11 @@ export const Route = createFileRoute("/account")({
 });
 
 function fmt(ts?: number) {
-  return ts ? new Date(ts).toLocaleString("zh-CN", { hour12: false }) : "还没有同步过";
+  return ts ? new Date(ts).toLocaleString(currentLocale(), { hour12: false }) : t("还没有同步过");
 }
 
 export function AccountPage() {
+  const { t } = useTranslation();
   const [user, setUser] = useState<User | null>(null);
   const [ready, setReady] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -51,61 +53,82 @@ export function AccountPage() {
   }, []);
   useEffect(() => {
     if (!user) return setIsAdmin(false);
-    void supabase.rpc("has_role", { _user_id: user.id, _role: "admin" }).then(({ data }) => setIsAdmin(Boolean(data)));
+    void supabase
+      .rpc("has_role", { _user_id: user.id, _role: "admin" })
+      .then(({ data }) => setIsAdmin(Boolean(data)));
   }, [user]);
 
   return (
     <main className="mx-auto min-h-screen max-w-md px-5 pb-16 pt-[max(1.5rem,env(safe-area-inset-top))]">
-      <Link to="/" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary">
-        <ArrowLeft className="size-4" /> 返回词库
+      <Link
+        to="/"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary"
+      >
+        <ArrowLeft className="size-4" /> {t("返回词库")}
       </Link>
-      <h1 className="mt-4 text-3xl">账号与同步</h1>
-      <p className="mt-1 text-sm text-muted-foreground">不登录也能正常使用；登录后词库和进度会自动同步到其他设备。</p>
+      <h1 className="mt-4 text-3xl">{t("账号与同步")}</h1>
+      <p className="mt-1 text-sm text-muted-foreground">
+        {t("不登录也能正常使用；登录后词库和进度会自动同步到其他设备。")}
+      </p>
 
       {!ready ? null : user ? (
         <section className="mt-6 space-y-4">
           <div className="rounded-3xl bg-card p-5 shadow-card">
-            <p className="text-xs text-muted-foreground">当前账号</p>
+            <p className="text-xs text-muted-foreground">{t("当前账号")}</p>
             <p className="mt-1 break-all font-medium">{user.email}</p>
           </div>
           <div className="rounded-3xl bg-card p-5 shadow-card">
             <div className="flex items-center gap-2">
               <Cloud className="size-4 text-primary" />
-              <h2 className="text-sm font-medium">同步状态</h2>
+              <h2 className="text-sm font-medium">{t("同步状态")}</h2>
             </div>
-            <p className="mt-2 text-sm">上次同步：{fmt(status.lastSync)}</p>
-            {status.error && <p role="alert" className="mt-2 text-sm text-destructive">{status.error}</p>}
-            <Button className="mt-4 w-full" disabled={status.syncing} onClick={() => void syncNow()}>
+            <p className="mt-2 text-sm">
+              {t("上次同步：")}
+              {fmt(status.lastSync)}
+            </p>
+            {status.error && (
+              <p role="alert" className="mt-2 text-sm text-destructive">
+                {t(status.error)}
+              </p>
+            )}
+            <Button
+              className="mt-4 w-full"
+              disabled={status.syncing}
+              onClick={() => void syncNow()}
+            >
               <RefreshCw className={`size-4 ${status.syncing ? "animate-spin" : ""}`} />
-              {status.syncing ? "同步中…" : "立即同步"}
+              {status.syncing ? t("同步中…") : t("立即同步")}
             </Button>
           </div>
           {isAdmin && (
             <Button asChild variant="outline" className="w-full">
-              <a href={`${siteOrigin()}/admin`}>打开管理后台</a>
+              <a href={`${siteOrigin()}/admin`}>{t("打开管理后台")}</a>
             </Button>
           )}
           <Button variant="ghost" className="w-full" onClick={() => void supabase.auth.signOut()}>
-            退出登录
+            {t("退出登录")}
           </Button>
-          <p className="text-xs text-muted-foreground">退出后，本机词库仍然保留，可以继续离线学习。</p>
+          <p className="text-xs text-muted-foreground">
+            {t("退出后，本机词库仍然保留，可以继续离线学习。")}
+          </p>
           <DeleteAccount />
         </section>
       ) : (
         <AuthForm />
       )}
       <p className="mt-10 text-center text-xs text-muted-foreground">
-        登录即表示你已阅读{" "}
+        {t("登录即表示你已阅读")}{" "}
         <Link to="/privacy" className="underline hover:text-primary">
-          隐私说明
-        </Link>
-        ，了解数据如何保存和删除。
+          {t("隐私说明")}
+        </Link>{" "}
+        {t("，了解数据如何保存和删除。")}
       </p>
     </main>
   );
 }
 
 function AuthForm() {
+  const { t } = useTranslation();
   const [signup, setSignup] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -128,40 +151,75 @@ function AuthForm() {
           },
         });
         if (error) throw error;
-        if (!data.session) setNotice("注册成功！请到邮箱点击确认链接，然后回来登录。");
+        if (!data.session) setNotice(t("注册成功！请到邮箱点击确认链接，然后回来登录。"));
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : "";
-      setNotice(/invalid login/i.test(msg) ? "邮箱或密码不对。" : msg || "失败了，请重试。");
+      setNotice(/invalid login/i.test(msg) ? t("邮箱或密码不对。") : msg || t("失败了，请重试。"));
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <form onSubmit={submit} className="mt-6 flex flex-col gap-4 rounded-3xl bg-card p-5 shadow-card">
-      <h2 className="text-lg font-medium">{signup ? "注册新账号" : "登录"}</h2>
+    <form
+      onSubmit={submit}
+      className="mt-6 flex flex-col gap-4 rounded-3xl bg-card p-5 shadow-card"
+    >
+      <h2 className="text-lg font-medium">{signup ? t("注册新账号") : t("登录")}</h2>
       {signup && (
         <label className="text-sm">
-          名字（家人/老师看到的称呼）
-          <input value={name} onChange={(e) => setName(e.target.value)} className="mt-2 h-11 w-full rounded-xl border border-input bg-background px-3" />
+          {t("名字（家人/老师看到的称呼）")}
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="mt-2 h-11 w-full rounded-xl border border-input bg-background px-3"
+          />
         </label>
       )}
       <label className="text-sm">
-        邮箱
-        <input type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-2 h-11 w-full rounded-xl border border-input bg-background px-3" />
+        {t("邮箱")}
+        <input
+          type="email"
+          required
+          autoComplete="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="mt-2 h-11 w-full rounded-xl border border-input bg-background px-3"
+        />
       </label>
       <label className="text-sm">
-        密码
-        <input type="password" required minLength={6} autoComplete={signup ? "new-password" : "current-password"} value={password} onChange={(e) => setPassword(e.target.value)} className="mt-2 h-11 w-full rounded-xl border border-input bg-background px-3" />
+        {t("密码")}
+        <input
+          type="password"
+          required
+          minLength={6}
+          autoComplete={signup ? "new-password" : "current-password"}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="mt-2 h-11 w-full rounded-xl border border-input bg-background px-3"
+        />
       </label>
-      <Button type="submit" disabled={busy}>{busy ? "请稍候…" : signup ? "注册" : "登录"}</Button>
-      {notice && <p role="status" className="text-sm text-muted-foreground">{notice}</p>}
-      <Button type="button" variant="link" onClick={() => { setSignup(!signup); setNotice(""); }}>
-        {signup ? "已有账号？去登录" : "没有账号？注册一个"}
+      <Button type="submit" disabled={busy}>
+        {busy ? t("请稍候…") : signup ? t("注册") : t("登录")}
+      </Button>
+      {notice && (
+        <p role="status" className="text-sm text-muted-foreground">
+          {notice}
+        </p>
+      )}
+      <Button
+        type="button"
+        variant="link"
+        onClick={() => {
+          setSignup(!signup);
+          setNotice("");
+        }}
+      >
+        {signup ? t("已有账号？去登录") : t("没有账号？注册一个")}
       </Button>
     </form>
   );
@@ -169,7 +227,9 @@ function AuthForm() {
 
 /** Inside the Android app the page origin is https://localhost, which email links can't open. */
 function siteOrigin() {
-  const native = (window as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor?.isNativePlatform?.();
+  const native = (
+    window as { Capacitor?: { isNativePlatform?: () => boolean } }
+  ).Capacitor?.isNativePlatform?.();
   return native ? "https://flashcard-sync.lovable.app" : window.location.origin;
 }
 
@@ -177,6 +237,8 @@ const CONFIRM_WORD = "删除";
 
 /** Permanently deletes the signed-in account and its cloud data; decks on this device are kept. */
 function DeleteAccount() {
+  const { t } = useTranslation();
+  const confirmWord = t(CONFIRM_WORD);
   const [open, setOpen] = useState(false);
   const [typed, setTyped] = useState("");
   const [busy, setBusy] = useState(false);
@@ -191,10 +253,10 @@ function DeleteAccount() {
       setBusy(false);
       setError(
         err.message.includes("last_admin")
-          ? "你是唯一的管理员，不能删除账号。请先把另一个账号设为管理员。"
+          ? t("你是唯一的管理员，不能删除账号。请先把另一个账号设为管理员。")
           : err.message.includes("delete_my_account")
-            ? "删除功能暂时不可用，请稍后再试，或发邮件联系我们删除。"
-            : `删除失败：${err.message}`,
+            ? t("删除功能暂时不可用，请稍后再试，或发邮件联系我们删除。")
+            : t("删除失败：{0}", err.message),
       );
       return;
     }
@@ -211,7 +273,7 @@ function DeleteAccount() {
   if (done) {
     return (
       <p role="status" className="rounded-2xl bg-secondary px-4 py-3 text-sm">
-        账号和云端数据已删除。本机词库仍然保留。
+        {t("账号和云端数据已删除。本机词库仍然保留。")}
       </p>
     );
   }
@@ -229,18 +291,24 @@ function DeleteAccount() {
     >
       <AlertDialogTrigger asChild>
         <Button variant="ghost" className="w-full text-destructive hover:text-destructive">
-          <Trash2 className="size-4" /> 删除账号
+          <Trash2 className="size-4" /> {t("删除账号")}
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>永久删除账号？</AlertDialogTitle>
+          <AlertDialogTitle>{t("永久删除账号？")}</AlertDialogTitle>
           <AlertDialogDescription asChild>
             <div className="space-y-2 text-left">
-              <p>将永久删除这个账号，以及保存在云端的全部词库、学习进度、每日记录和设置，无法恢复。</p>
-              <p>这台设备上的词库会保留，你仍然可以不登录继续使用。</p>
               <p>
-                请输入「{CONFIRM_WORD}」确认：
+                {t(
+                  "将永久删除这个账号，以及保存在云端的全部词库、学习进度、每日记录和设置，无法恢复。",
+                )}
+              </p>
+              <p>{t("这台设备上的词库会保留，你仍然可以不登录继续使用。")}</p>
+              <p>
+                {t("请输入「")}
+                {confirmWord}
+                {t("」确认：")}
               </p>
             </div>
           </AlertDialogDescription>
@@ -248,8 +316,8 @@ function DeleteAccount() {
         <input
           value={typed}
           onChange={(e) => setTyped(e.target.value)}
-          placeholder={CONFIRM_WORD}
-          aria-label={`输入${CONFIRM_WORD}确认`}
+          placeholder={confirmWord}
+          aria-label={t("输入{0}确认", confirmWord)}
           className="w-full rounded-xl border border-input bg-background px-3 py-2 text-base"
         />
         {error && (
@@ -258,13 +326,13 @@ function DeleteAccount() {
           </p>
         )}
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={busy}>取消</AlertDialogCancel>
+          <AlertDialogCancel disabled={busy}>{t("取消")}</AlertDialogCancel>
           <Button
             variant="destructive"
-            disabled={typed.trim() !== CONFIRM_WORD || busy}
+            disabled={typed.trim() !== confirmWord || busy}
             onClick={() => void confirmDelete()}
           >
-            {busy ? "删除中…" : "永久删除"}
+            {busy ? t("删除中…") : t("永久删除")}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

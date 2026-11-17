@@ -15,3 +15,4 @@
 - Preserve sanitized same-origin consent return paths through all login and signup methods, so delegated access completes without external redirect risks.
 - Cloud sync (src/lib/sync.ts) runs only in the browser via the Supabase client and RLS, never server functions, because the same code ships in the serverless Android app; localStorage stays the source of truth.
 - Merge rules live in src/lib/sync-merge.ts (pure, tested); local writes stamp updatedAt and emit `flashwords:dirty` to trigger debounced sync, while sync writes do not.
+- Use the shared language store and Italian dictionary for interface text on web and Android; language is device-local and must not translate or mutate user flashcards.

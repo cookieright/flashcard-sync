@@ -11,7 +11,9 @@ export const Route = createFileRoute("/privacy")({
       { title: "隐私说明 — 乖乖背词语" },
       { name: "description", content: "词卡 App 收集哪些数据、存在哪里、如何查看和删除。" },
       { property: "og:title", content: "隐私说明 — 乖乖背词语" },
+      { property: "og:description", content: "了解词卡如何保存、使用及删除你的学习数据。" },
       { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: PrivacyPage,
@@ -20,7 +22,10 @@ export const Route = createFileRoute("/privacy")({
 export function PrivacyPage() {
   return (
     <main className="mx-auto min-h-screen max-w-2xl px-5 pb-20 pt-[max(1.5rem,env(safe-area-inset-top))]">
-      <Link to="/" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary">
+      <Link
+        to="/"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary"
+      >
         <ArrowLeft className="size-4" /> 返回词库
       </Link>
       <h1 className="mt-4 text-3xl">隐私说明</h1>
@@ -39,7 +44,8 @@ export function PrivacyPage() {
 
       <Section title="1. 谁负责你的数据">
         <p>
-          「乖乖背词语 / 词卡」由个人开发者运营，供家人和学生学习使用。关于个人数据的任何问题，请发邮件到{" "}
+          「乖乖背词语 /
+          词卡」由个人开发者运营，供家人和学生学习使用。关于个人数据的任何问题，请发邮件到{" "}
           <a className="text-primary underline" href={`mailto:${CONTACT_EMAIL}`}>
             {CONTACT_EMAIL}
           </a>
@@ -50,11 +56,14 @@ export function PrivacyPage() {
       <Section title="2. 我们收集哪些数据">
         <p className="font-medium text-foreground">不登录时</p>
         <p>
-          导入的词库、学习进度、每日学习记录和设置，全部只保存在你设备的本地存储中，不会上传。卸载 App 或清除浏览器数据会一并删除这些内容。
+          导入的词库、学习进度、每日学习记录和设置，全部只保存在你设备的本地存储中，不会上传。卸载
+          App 或清除浏览器数据会一并删除这些内容。
         </p>
         <p className="font-medium text-foreground">登录账号后</p>
         <ul className="list-disc space-y-1 pl-5">
-          <li>账号信息：邮箱、密码（加密保存，任何人都无法看到原文）、显示名称、注册时间、最后活跃时间。</li>
+          <li>
+            账号信息：邮箱、密码（加密保存，任何人都无法看到原文）、显示名称、注册时间、最后活跃时间。
+          </li>
           <li>学习内容：你导入的词库名称和词语（正面、背面、例句）。</li>
           <li>学习进度：每个词的复习阶段、下次复习时间、复习和遗忘次数。</li>
           <li>每日记录：每天学习的新词数和复习次数。</li>
@@ -78,10 +87,13 @@ export function PrivacyPage() {
             管理员：可以看到你的名字、邮箱、学习统计（每日数量、连续天数、掌握率、最常忘的词）和词库进度。
           </li>
           <li>
-            数据托管服务商：云端数据存放在 Lovable Cloud（基于 Supabase）的服务器上，它们仅为存储和运行服务处理数据。
+            数据托管服务商：云端数据存放在 Lovable Cloud（基于
+            Supabase）的服务器上，它们仅为存储和运行服务处理数据。
           </li>
           <li>
-            发音服务：点「播放读音」或开启自动朗读时，当前词语的文字会发送给 Google 翻译的语音服务以获取读音（同时会传送你的 IP 地址），无法连接时改用手机自带的语音引擎在本机朗读。
+            发音服务：点「播放读音」或开启自动朗读时，当前词语的文字会发送给 Google
+            翻译的语音服务以获取读音（同时会传送你的 IP
+            地址），无法连接时改用手机自带的语音引擎在本机朗读。
           </li>
           <li>页面字体从 Google Fonts 加载，加载时你的 IP 地址会传送给 Google。</li>
         </ul>
@@ -108,17 +120,20 @@ export function PrivacyPage() {
           <li>删除你的账号和全部数据；</li>
           <li>反对或限制某些处理，例如不让管理员查看你的学习数据；</li>
           <li>
-            向数据保护机构投诉。在意大利是 Garante per la protezione dei dati personali（garanteprivacy.it）。
+            向数据保护机构投诉。在意大利是 Garante per la protezione dei dati
+            personali（garanteprivacy.it）。
           </li>
         </ul>
         <p>
-          删除账号：在「账号与同步」页面点「删除账号」，账号和云端全部数据会立即永久删除，本机词库保留。其他权利请从注册邮箱发邮件到 {CONTACT_EMAIL}，我们会在 30 天内处理。如果你只是想停止同步，退出登录即可。
+          删除账号：在「账号与同步」页面点「删除账号」，账号和云端全部数据会立即永久删除，本机词库保留。其他权利请从注册邮箱发邮件到{" "}
+          {CONTACT_EMAIL}，我们会在 30 天内处理。如果你只是想停止同步，退出登录即可。
         </p>
       </Section>
 
       <Section title="8. 未成年人">
         <p>
-          未满 14 岁的用户需由父母或监护人同意后才能注册账号；不登录则无需提供任何个人信息即可使用全部学习功能。家长可随时联系我们查看或删除孩子的数据。
+          未满 14
+          岁的用户需由父母或监护人同意后才能注册账号；不登录则无需提供任何个人信息即可使用全部学习功能。家长可随时联系我们查看或删除孩子的数据。
         </p>
       </Section>
 

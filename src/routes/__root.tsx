@@ -10,6 +10,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 import { ClientOnly } from "@tanstack/react-router";
 import { SyncHost } from "@/components/sync-host";
+import { LanguageSwitch } from "@/components/language-switch";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -120,7 +121,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="zh-CN">
       <head>
         <HeadContent />
       </head>
@@ -137,6 +138,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <LanguageSwitch />
       <ClientOnly fallback={null}>
         <SyncHost />
       </ClientOnly>
