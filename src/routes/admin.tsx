@@ -297,8 +297,8 @@ function UserDetail({
 
   if (!profile) return null;
   return (
-    <section className="mt-6 grid gap-5 md:grid-cols-2">
-      <div className="rounded-3xl bg-card p-5 shadow-card md:col-span-2">
+    <section className="mt-6 grid grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-2">
+      <div className="min-w-0 rounded-3xl bg-card p-5 shadow-card md:col-span-2">
         <h2 className="text-lg">
           {profile.display_name || profile.email} {t("· 最近 30 天")}
         </h2>
@@ -321,7 +321,7 @@ function UserDetail({
             </div>
           ))}
         </div>
-        <div className="mt-2 flex justify-between text-xs text-muted-foreground">
+        <div className="mt-2 flex flex-wrap justify-between gap-2 text-xs text-muted-foreground">
           <span>{days[0]?.k.slice(5)}</span>
           <span className="flex gap-3">
             <span>
@@ -336,7 +336,7 @@ function UserDetail({
           <span>{t("今天")}</span>
         </div>
       </div>
-      <div className="rounded-3xl bg-card p-5 shadow-card">
+      <div className="min-w-0 rounded-3xl bg-card p-5 shadow-card">
         <h3 className="font-medium">{t("各词库进度")}</h3>
         <ul className="mt-3 space-y-3 text-sm">
           {decks.length === 0 && <li className="text-muted-foreground">{t("还没有同步词库")}</li>}
@@ -347,9 +347,9 @@ function UserDetail({
               : 0;
             return (
               <li key={d.id}>
-                <div className="flex justify-between">
-                  <span className="truncate">{d.name}</span>
-                  <span className="tabular-nums text-muted-foreground">
+                <div className="flex justify-between gap-2">
+                  <span className="min-w-0 truncate">{d.name}</span>
+                  <span className="shrink-0 tabular-nums text-muted-foreground">
                     {pct}% · {c.length} {t("词")}
                   </span>
                 </div>
@@ -361,7 +361,7 @@ function UserDetail({
           })}
         </ul>
       </div>
-      <div className="rounded-3xl bg-card p-5 shadow-card">
+      <div className="min-w-0 rounded-3xl bg-card p-5 shadow-card">
         <h3 className="font-medium">{t("最容易忘的词")}</h3>
         <ol className="mt-3 space-y-1.5 text-sm">
           {hardest.length === 0 && <li className="text-muted-foreground">{t("暂无")}</li>}
